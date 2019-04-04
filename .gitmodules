@@ -1,0 +1,3 @@
+[submodule "mcd"]
+	path = mcd
+	url = https://github.com/SiLeader/mcd.git

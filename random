@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+
+import argparse
+import string
+import random
+
+
+def main():
+    parser = argparse.ArgumentParser(description='random value generator')
+    sub_parsers = parser.add_subparsers()
+
+    string_parser = sub_parsers.add_parser('string')
+    string_parser.add_argument('--length', '--len', '-l', help='string length (default 16)', type=int, default=16)
+    string_parser.add_argument('--count', '-c', help='string count (default 1)', type=int, default=1)
+    string_parser.add_argument('--upper', '-U', help='use upper capital', action='store_true')
+    string_parser.add_argument('--lower', '-L', help='use lower capital', action='store_true')
+    string_parser.add_argument('--number', '-N', help='use number', action='store_true')
+    string_parser.add_argument('--symbol', '-S', help='use symbol', action='store_true')
+    string_parser.add_argument('--all', '-A', help='use all', action='store_true')
+    string_parser.set_defaults(handler=__string)
+
+    select_parser = sub_parsers.add_parser('select')
+    select_parser.add_argument('--count', '-c', help='select item count (default 1)', default=1, type=int)
+    select_parser.add_argument('--duplicate', '--dup', '-d', help='allow duplicate', action='store_true')
+    select_parser.add_argument('item', help='target items', nargs='*')
+    select_parser.add_argument('--list', '-l', '--file', '-f', help='list file')
+    select_parser.set_defaults(handler=__select)
+
+    args = parser.parse_args()
+    if hasattr(args, 'handler'):
+        args.handler(args)
+    else:
+        parser.print_help()
+
+
+def __create_string(upper, lower, number, symbol):
+    sss = ""
+    if upper:
+        sss += string.ascii_uppercase
+    if lower:
+        sss += string.ascii_lowercase
+    if number:
+        sss += string.digits
+    if symbol:
+        sss += "!@#$%^&*()_+=-[]{}|;:<>?/.,~"
+    return sss
+
+
+def __string(args):
+    length = args.length
+    count = args.count
+    upper = args.upper
+    lower = args.lower
+    number = args.number
+    symbol = args.symbol
+
+    if args.all:
+        upper = lower = number = symbol = True
+
+    src = __create_string(upper, lower, number, symbol)
+    [
+        print(''.join(random.choices(src, k=length)))
+        for _ in range(count)
+    ]
+
+
+def __select(args):
+    count = args.count
+    dup = args.duplicate
+    items = args.item
+
+    if hasattr(args, 'list'):
+        with open(args.list) as fp:
+            items.extend([l.rstrip('\n') for l in fp.readlines()])
+
+    if len(items) <= count:
+        selected = items
+    else:
+        if dup:
+            selected = random.choices(items, k=count)
+        else:
+            selected = random.sample(items, k=count)
+    selected.sort()
+    [print(s) for s in selected]
+
+
+if __name__ == '__main__':
+    main()

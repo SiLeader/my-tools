@@ -1,0 +1,28 @@
+#!/usr/bin/env python3
+
+import json
+import argparse
+
+
+parser = argparse.ArgumentParser(prog="prettify", description="JSON formatter")
+parser.add_argument("-i", "--indent", action="store", default=2, type=int, help="indent depth")
+parser.add_argument("input", type=str, help="input file path")
+parser.add_argument("-o", "--output", action="store", default=None, type=str, help="output file name (default: input file)")
+parser.add_argument("--stdout", action="store_true", help="output to stdout")
+
+args = parser.parse_args()
+
+in_file = args.input
+out_file = args.output
+if out_file is None:
+    out_file = in_file
+
+with open(in_file) as fp:
+    content = json.load(fp)
+
+if args.stdout:
+    print(json.dumps(content, sort_keys=True, indent=args.indent))
+else:
+    with open(out_file, "w") as fp:
+        json.dump(content, fp, sort_keys=True, indent=args.indent)
+
